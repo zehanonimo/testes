@@ -1,0 +1,151 @@
+Sub CalculaSerieA()
+Dim I As Long
+Dim imax As Long
+Dim matriz(20, 5) As Long
+
+Dim matriztrem(114, 20) As Long 'comentar: Tabela com verificação de pontos
+Dim trem As Double    'comentar
+trem = 0            'comentar
+Dim jogos As Long
+jogos = 380
+
+Dim vetor(20) As Long  'comentar
+
+Range("Am2") = Format(Now, "dd/mm/yyyy HH:mm:ss") & Right(Format(Timer, "0.000"), 4)
+
+'TRECHO PARA DEIXAR SÓ OS JOGOS NÃO REALIZADOS PARA CALCULAR'
+
+Dim equipe As Double
+equipe = Range("ar2").Value - 1 'Para fazer o mapa das posições que o time pode alcançar'
+Dim posicoes_equipe(20) As Long
+
+imax = Range("x24")
+I = 0
+Range("H:L").Calculate
+OrdenaColunas
+
+Dim primeirofalso As Long
+
+Do While j < jogos
+    If Range("h2").Cells(j).Value = False Then
+        primeirofalso = j
+        Exit Do
+    Else: j = j + 1
+    End If
+Loop
+
+Dim calculavel As Range
+Set calculavel = Range(Cells(primeirofalso, 9), Cells(jogos + 1, 12))
+
+'FIM DO TRECHO PARA DEIXAR SÓ OS JOGOS NÃO REALIZADOS PARA CALCULAR'
+
+Do While I < imax
+calculavel.Calculate
+Range("p2:t21").Calculate
+
+    'Randomize
+    'For j = 1 To jogos
+    'trem = Rnd()
+    'If Range("H2").Cells(j, 1).Value = False Then
+    'Range("H2").Cells(j, 2).Value = trem
+    'Range("H2").Cells(j, 3).Value = 1 - trem
+    'End If
+    'Range("K2:L97").Calculate
+    'Next
+
+I = I + 1
+
+'Range("ak25") = I'
+If I Mod 100 = 0 Then
+ Range("am25") = I / imax
+ End If
+
+'RECONHECIMENTO DE QUANDO O TIME ESTÁ DENTRO DAS ZONAS'
+
+For j = 1 To 20
+
+If Range("Q2").Cells(j, 1).Value <= 1 Then
+ matriz(j, 1) = matriz(j, 1) + 1
+ End If
+
+If Range("Q2").Cells(j, 2).Value <= 5 Then
+ matriz(j, 2) = matriz(j, 2) + 1
+ End If
+ 
+If Range("Q2").Cells(j, 2).Value <= 7 Then
+ matriz(j, 3) = matriz(j, 3) + 1
+ End If
+
+'If Range("Q2").Cells(j, 2).Value <= 8 Then
+If (Range("Q2").Cells(j, 2).Value <= 13 And Range("Q2").Cells(j, 4).Value <= 12) Then
+ matriz(j, 4) = matriz(j, 4) + 1
+ End If
+
+'If Range("Q2").Cells(j, 2).Value <= 4 Then
+If Range("Q2").Cells(j, 3).Value <= 4 Then
+ matriz(j, 5) = matriz(j, 5) + 1
+ End If
+ 
+
+'CÁLCULO DOS PONTOS PARA CADA POSIÇÃO'
+'For k = 1 To 20                                'comentar: tabelão 114x20
+'If Range("Q2").Cells(j, 1).Value = k Then      'comentar: Verificação de quantos pontos tem a posição X no final do campeonato
+' trem = Int(Range("P2").Cells(j, 1).Value)     'comentar
+' matriztrem(trem, k) = matriztrem(trem, k) + 1  'comentar
+'End If                                          'comentar
+'Next
+ 
+Next
+
+'EM QUE POSIÇÕES O CLUBE PODE TERMINAR?'
+'posicoes_equipe(Range("Q2").Cells(equipe, 1).Value) = posicoes_equipe(Range("Q2").Cells(equipe, 1).Value) + 1
+ 
+Loop
+
+For j = 1 To 20
+Range("W2").Cells(j).Value = Range("O2").Cells(j).Value
+For k = 1 To 5
+Range("X2").Cells(j, k).Value = matriz(j, k)
+Range("AC2").Cells(j, k).Value = matriz(j, k) / imax
+
+    If matriz(j, k) / imax = 1 Or matriz(j, k) / imax = 0 Then                          'Formatar as casas decimais
+        Range("AC2").Cells(j, k).NumberFormat = "0%"                                    'Dependendo de quantas iterações forem feitas, precisa mudar o código
+        ElseIf (matriz(j, k) / imax) > 0.999 And matriz(j, k) / imax < 1 Then
+        Range("AC2").Cells(j, k).NumberFormat = "0.##0%"
+        ElseIf (matriz(j, k) / imax) > 0.99 And matriz(j, k) / imax <= 0.999 Then
+        Range("AC2").Cells(j, k).NumberFormat = "0.#0%"
+        ElseIf (matriz(j, k) / imax) >= 0.01 And matriz(j, k) / imax <= 0.99 Then
+        Range("AC2").Cells(j, k).NumberFormat = "0.0%"
+        ElseIf (matriz(j, k) / imax) >= 0.001 And matriz(j, k) / imax < 0.01 Then
+        Range("AC2").Cells(j, k).NumberFormat = "0.#0%"
+        ElseIf (matriz(j, k) / imax) >= 0.00001 And matriz(j, k) / imax < 0.001 Then
+        Range("AC2").Cells(j, k).NumberFormat = "0.##0%"
+        End If
+
+Next
+Next
+
+'IMPRESSÃO DA TABELA DE PONTOS'
+'For j = 1 To 114                                     'comentar: Imprime a tabela de pontos
+' For k = 1 To 20
+'  Range("bj2").Cells(j, k).Value = matriztrem(j, k)  'comentar
+' Next                                                'comentar
+'Next
+
+'IMPRESSÃO DA TABELA DE POSIÇÕES'
+'For j = 1 To 20
+' Range("Au2").Cells(j).Value = posicoes_equipe(j)
+'Next
+
+Final:
+
+Range("AM3") = Format(Now, "dd/mm/yyyy HH:mm:ss") & Right(Format(Timer, "0.000"), 4)
+
+'BEEP PARA QUANDO A SIMULAÇÃO É LONGA'
+'Dim BP
+'For BP = 1 To 5 ' Loop 3 times.
+' Beep ' Sound a tone.
+' Application.Wait (Now + TimeValue("0:00:02"))
+' Next
+
+End Sub
